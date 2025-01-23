@@ -17,7 +17,7 @@ public class Consumer implements Runnable {
         try {
             while (true) {
                 Integer number = queue.take();
-                System.out.println("items processed: "+counter+" Consumed: " + number);
+                System.out.println("Items processed: " + counter + " Consumed: " + number);
                 if (counter.incrementAndGet() >= 100) {
                     System.exit(0);
                 }

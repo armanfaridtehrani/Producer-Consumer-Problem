@@ -16,22 +16,29 @@ public class RaceConditionApplication implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args) throws Exception {
-
+    public void run(String... args) {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         AtomicInteger counter = new AtomicInteger(0);
 
-        for (int i = 0; i < 3; i++) {
-            executorService.submit(new Producer(queue));
+        try {
+            for (int i = 0; i < 3; i++) {
+                executorService.submit(new Producer(queue));
+            }
+
+            for (int i = 0; i < 5; i++) {
+                executorService.submit(new Consumer(queue, counter));
+            }
+        } finally {
+            executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
-
-        for (int i = 0; i < 5; i++) {
-            executorService.submit(new Consumer(queue, counter));
-        }
-
-
-//        executorService.shutdown();
-//        executorService.awaitTermination(1, TimeUnit.MINUTES);
     }
 }
