@@ -18,10 +18,8 @@ public class RaceConditionApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
-        ExecutorService executorService = Executors.newFixedThreadPool(8);
         AtomicInteger counter = new AtomicInteger(0);
-
-        try {
+        try (ExecutorService executorService = Executors.newFixedThreadPool(8)) {
             for (int i = 0; i < 3; i++) {
                 executorService.submit(new Producer(queue));
             }
@@ -29,16 +27,8 @@ public class RaceConditionApplication implements CommandLineRunner {
             for (int i = 0; i < 5; i++) {
                 executorService.submit(new Consumer(queue, counter));
             }
-        } finally {
-            executorService.shutdown();
-            try {
-                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executorService.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

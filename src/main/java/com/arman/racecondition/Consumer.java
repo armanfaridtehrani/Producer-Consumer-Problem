@@ -15,13 +15,31 @@ public class Consumer implements Runnable {
     @Override
     public void run() {
         try {
+            //solution 1
             while (true) {
-                Integer number = queue.take();
-                System.out.println("Items processed: " + counter + " Consumed: " + number);
-                if (counter.incrementAndGet() >= 100) {
-                    System.exit(0);
+                synchronized (counter){
+                    if (counter.get() >= 100) {
+                        break;
+                    }
+                    Integer number = queue.take();
+                    System.out.println("Items processed: " + counter + " Consumed: " + number);
+                    counter.incrementAndGet();
                 }
             }
+            System.exit(0);
+
+            //solution 2
+//            while (true) {
+//                int currentCount = counter.get();
+//                if (currentCount >= 100) {
+//                    break;
+//                }
+//                Integer number = queue.take();
+//                if (counter.compareAndSet(currentCount, currentCount + 1)) {
+//                    System.out.println("Items processed: " + counter + " Consumed: " + number);
+//                }
+//            }
+//            System.exit(0);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
